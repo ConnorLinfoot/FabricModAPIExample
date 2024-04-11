@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "fabric-mod-api-example",
+  "version": "${version}",
+  "name": "Fabric Mod API Example",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/ConnorLinfoot/FabricModAPIExample"
+  },
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.linfoot.modapi.HypixelFabricModExample"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
