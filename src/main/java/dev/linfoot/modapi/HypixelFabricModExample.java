@@ -61,8 +61,13 @@ public class HypixelFabricModExample implements ClientModInitializer {
     private void registerNetworkHandlers() {
         for (String identifier : HypixelModAPI.getInstance().getRegistry().getIdentifiers()) {
             ClientPlayNetworking.registerGlobalReceiver(new Identifier(identifier), (client, handler, buf, responseSender) -> {
+                buf.retain();
                 client.execute(() -> {
-                    HypixelModAPI.getInstance().handle(identifier, new PacketSerializer(buf));
+                    try {
+                        HypixelModAPI.getInstance().handle(identifier, new PacketSerializer(buf));
+                    } finally {
+                        buf.release();
+                    }
                 });
             });
         }
