@@ -1,11 +1,13 @@
 package dev.linfoot.modapi;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.linfoot.modapi.payload.ClientboundHypixelPayload;
+import dev.linfoot.modapi.payload.ServerboundHypixelPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.handler.ClientboundPacketHandler;
 import net.hypixel.modapi.packet.ClientboundHypixelPacket;
@@ -15,21 +17,20 @@ import net.hypixel.modapi.packet.impl.clientbound.ClientboundPartyInfoPacket;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPlayerInfoPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundLocationPacket;
-import net.hypixel.modapi.serializer.PacketSerializer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class HypixelFabricModExample implements ClientModInitializer {
     private final ServerboundPacketRegistry registry = new ServerboundPacketRegistry();
+    private ClientboundPacketHandler handler;
 
     @Override
     public void onInitializeClient() {
-        HypixelModAPI.getInstance().registerHandler(new ClientboundPacketHandler() {
+        handler = new ClientboundPacketHandler() {
             private void handle(ClientboundHypixelPacket packet) {
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Received packet " + packet));
             }
@@ -53,22 +54,21 @@ public class HypixelFabricModExample implements ClientModInitializer {
             public void onPlayerInfoPacket(ClientboundPlayerInfoPacket packet) {
                 handle(packet);
             }
-        });
-        registerNetworkHandlers();
+        };
+        registerPayloads();
         registerCommand();
     }
 
-    private void registerNetworkHandlers() {
+    private void registerPayloads() {
         for (String identifier : HypixelModAPI.getInstance().getRegistry().getIdentifiers()) {
-            ClientPlayNetworking.registerGlobalReceiver(new Identifier(identifier), (client, handler, buf, responseSender) -> {
-                buf.retain();
-                client.execute(() -> {
-                    try {
-                        HypixelModAPI.getInstance().handle(identifier, new PacketSerializer(buf));
-                    } finally {
-                        buf.release();
-                    }
-                });
+            CustomPayload.Id<ServerboundHypixelPayload> serverboundId = CustomPayload.id(identifier);
+            PayloadTypeRegistry.playC2S().register(serverboundId, ServerboundHypixelPayload.buildCodec(serverboundId));
+
+            CustomPayload.Id<ClientboundHypixelPayload> clientboundId = CustomPayload.id(identifier);
+            PayloadTypeRegistry.playS2C().register(clientboundId, ClientboundHypixelPayload.buildCodec(clientboundId));
+
+            ClientPlayNetworking.registerGlobalReceiver(clientboundId, (payload, context) -> {
+                payload.getPacket().handle(handler);
             });
         }
     }
@@ -90,19 +90,11 @@ public class HypixelFabricModExample implements ClientModInitializer {
     }
 
     public void sendPacket(String identifier) {
-        PacketByteBuf buf = PacketByteBufs.create();
         HypixelPacket packet = registry.createPacket(identifier);
-        packet.write(new PacketSerializer(buf));
-        sendPacket(identifier, buf);
+        sendPacket(packet);
     }
 
     public void sendPacket(HypixelPacket packet) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        packet.write(new PacketSerializer(buf));
-        ClientPlayNetworking.send(new Identifier(packet.getIdentifier()), buf);
-    }
-
-    private void sendPacket(String identifier, PacketByteBuf buf) {
-        ClientPlayNetworking.send(new Identifier(identifier), buf);
+        ClientPlayNetworking.send(new ServerboundHypixelPayload(packet));
     }
 }
