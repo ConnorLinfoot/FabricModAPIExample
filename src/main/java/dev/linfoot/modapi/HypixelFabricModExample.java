@@ -68,7 +68,11 @@ public class HypixelFabricModExample implements ClientModInitializer {
             PayloadTypeRegistry.playS2C().register(clientboundId, ClientboundHypixelPayload.buildCodec(clientboundId));
 
             ClientPlayNetworking.registerGlobalReceiver(clientboundId, (payload, context) -> {
-                payload.getPacket().handle(handler);
+                if (payload.isSuccess()) {
+                    payload.getPacket().handle(handler);
+                } else {
+                    System.err.println("Got error packet: " + payload.getErrorReason());
+                }
             });
         }
     }
