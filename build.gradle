@@ -1,7 +1,6 @@
 plugins {
-    id 'fabric-loom' version '1.5-SNAPSHOT'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
 version = project.mod_version
@@ -32,20 +31,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    shadow "net.hypixel:mod-api:0.3.1"
-}
-
-shadowJar {
-    // Exclude all dependencies by default
-    configurations = [project.configurations.shadow]
-
-    // Rename the shaded JAR
-    archiveClassifier = 'shaded'
-}
-
-remapJar {
-    dependsOn(shadowJar)
-    inputFile = tasks.shadowJar.archiveFile
+    modImplementation "net.hypixel:mod-api:0.3.2"
 }
 
 processResources {
