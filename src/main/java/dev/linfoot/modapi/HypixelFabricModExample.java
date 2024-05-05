@@ -7,13 +7,8 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.hypixel.modapi.HypixelModAPI;
-import net.hypixel.modapi.handler.ClientboundPacketHandler;
-import net.hypixel.modapi.packet.ClientboundHypixelPacket;
+import net.hypixel.modapi.fabric.event.HypixelModAPICallback;
 import net.hypixel.modapi.packet.HypixelPacket;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundLocationPacket;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundPartyInfoPacket;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundPlayerInfoPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundLocationPacket;
 import net.hypixel.modapi.serializer.PacketSerializer;
 import net.minecraft.client.MinecraftClient;
@@ -32,30 +27,8 @@ public class HypixelFabricModExample implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        HypixelModAPI.getInstance().registerHandler(new ClientboundPacketHandler() {
-            private void handle(ClientboundHypixelPacket packet) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Received packet " + packet));
-            }
-
-            @Override
-            public void onPingPacket(ClientboundPingPacket packet) {
-                handle(packet);
-            }
-
-            @Override
-            public void onLocationPacket(ClientboundLocationPacket packet) {
-                handle(packet);
-            }
-
-            @Override
-            public void onPartyInfoPacket(ClientboundPartyInfoPacket packet) {
-                handle(packet);
-            }
-
-            @Override
-            public void onPlayerInfoPacket(ClientboundPlayerInfoPacket packet) {
-                handle(packet);
-            }
+        HypixelModAPICallback.EVENT.register(clientboundHypixelPacket -> {
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Received packet " + clientboundHypixelPacket));
         });
         registerCommand();
     }
