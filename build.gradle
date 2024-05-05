@@ -37,7 +37,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    // Core Mod API library, required if you wish to send packets or use the built in packet handler
+    // Core Mod API library, required for the core mod definitions
     modImplementation "net.hypixel:mod-api:${project.hypixel_mod_api}"
 
     // Fabric implementation of the Mod API, used if you wish to use the Fabric event callback for handling incoming packets
