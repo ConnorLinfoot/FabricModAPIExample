@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.fabric.event.HypixelModAPICallback;
@@ -28,12 +29,16 @@ public class HypixelFabricModExample implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // Subscribe to location events
-        HypixelModAPI.getInstance().subscribeToEventPacket(ClientboundLocationPacket.class);
+        // Currently using the server join event as the Mod API may not be initialized yet
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            // Subscribe to location events
+            HypixelModAPI.getInstance().subscribeToEventPacket(ClientboundLocationPacket.class);
+        });
 
         HypixelModAPICallback.EVENT.register(clientboundHypixelPacket -> {
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Received packet " + clientboundHypixelPacket));
         });
+
         registerCommand();
     }
 
