@@ -9,7 +9,8 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.fabric.event.HypixelModAPICallback;
 import net.hypixel.modapi.packet.HypixelPacket;
-import net.hypixel.modapi.packet.impl.serverbound.ServerboundLocationPacket;
+import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPlayerInfoPacket;
 import net.hypixel.modapi.serializer.PacketSerializer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
@@ -27,6 +28,9 @@ public class HypixelFabricModExample implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Subscribe to location events
+        HypixelModAPI.getInstance().subscribeToEventPacket(ClientboundLocationPacket.class);
+
         HypixelModAPICallback.EVENT.register(clientboundHypixelPacket -> {
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Received packet " + clientboundHypixelPacket));
         });
@@ -39,7 +43,7 @@ public class HypixelFabricModExample implements ClientModInitializer {
                         .executes(context -> {
                             String identifier = context.getArgument("type", String.class);
                             if (identifier.equals("direct")) {
-                                sendPacket(new ServerboundLocationPacket());
+                                sendPacket(new ServerboundPlayerInfoPacket());
                             } else {
                                 if (sendPacket(identifier)) {
                                     FabricClientCommandSource source = context.getSource();

@@ -41,21 +41,21 @@ dependencies {
     modImplementation "net.hypixel:mod-api:${project.hypixel_mod_api}"
 
     // Fabric implementation of the Mod API, used if you wish to use the Fabric event callback for handling incoming packets
-    modImplementation "maven.modrinth:hypixel-mod-api:${project.hypixel_mod_api}+mc${project.minecraft_version}"
+    modImplementation "maven.modrinth:hypixel-mod-api:${project.hypixel_fabric_mod_api}+mc${project.minecraft_version}"
 }
 
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
-    inputs.property "hypixel_mod_api", project.hypixel_mod_api
+    inputs.property "hypixel_fabric_mod_api", project.hypixel_fabric_mod_api
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version,
-                "hypixel_mod_api": project.hypixel_mod_api
+                "hypixel_fabric_mod_api": project.hypixel_fabric_mod_api
     }
 }
 

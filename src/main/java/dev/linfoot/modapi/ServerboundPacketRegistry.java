@@ -1,7 +1,6 @@
 package dev.linfoot.modapi;
 
 import net.hypixel.modapi.packet.HypixelPacket;
-import net.hypixel.modapi.packet.impl.serverbound.ServerboundLocationPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPlayerInfoPacket;
@@ -18,7 +17,6 @@ class ServerboundPacketRegistry {
 
     ServerboundPacketRegistry() {
         register("hypixel:ping", ServerboundPingPacket::new);
-        register("hypixel:location", ServerboundLocationPacket::new);
         register("hypixel:party_info", ServerboundPartyInfoPacket::new);
         register("hypixel:player_info", ServerboundPlayerInfoPacket::new);
     }
