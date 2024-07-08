@@ -35,6 +35,10 @@ public class HypixelFabricModExample implements ClientModInitializer {
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Received packet " + clientboundHypixelPacket));
         });
 
+        HypixelModAPI.getInstance().registerHandler(ClientboundLocationPacket.class, packet -> {
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Received location packet with server " + packet.getServerName()));
+        });
+
         registerCommand();
     }
 
